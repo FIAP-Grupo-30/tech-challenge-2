@@ -4,8 +4,12 @@ async function connectDB() {
   try {
     const env = process.env.NODE_ENV || 'development';
 
-    if (env === 'development' || env === 'test') {
-      // Use in-memory MongoDB only for development and tests
+    const forceMemory = (process.env.MONGO_IN_MEMORY || '').toLowerCase() === 'true';
+    const useMemory = forceMemory || env === 'development' || env === 'test' || !process.env.MONGO_URI;
+
+    if (useMemory) {
+      // Use in-memory MongoDB for development, tests, or when explicitly forced
+      console.log('Inicializando MongoDB em memória (mongodb-memory-server)');
       const { MongoMemoryServer } = require('mongodb-memory-server');
       const mongod = await MongoMemoryServer.create();
       const mongoUri = mongod.getUri();
@@ -14,11 +18,7 @@ async function connectDB() {
       return;
     }
 
-    // Em produção, requerer MONGO_URI
-    if (!process.env.MONGO_URI) {
-      throw new Error('MONGO_URI não está definido em ambiente de produção');
-    }
-
+    // Em produção com MONGO_URI configurado
     await mongoose.connect(process.env.MONGO_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true
