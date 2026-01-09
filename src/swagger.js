@@ -1,5 +1,7 @@
 const swaggerJsdoc = require('swagger-jsdoc');
 
+const serverUrl = process.env.BASE_URL || (process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : '');
+
 const options = {
   definition: {
     openapi: '3.0.0',
@@ -15,7 +17,6 @@ const options = {
           scheme: 'bearer',
           bearerFormat: 'JWT',
         }
-    
       }
     },
     security: [
@@ -25,8 +26,8 @@ const options = {
     ],
     servers: [
       {
-        url: 'http://localhost:3000',
-        description: 'Servidor de Desenvolvimento',
+        url: serverUrl,
+        description: 'Servidor',
       },
     ],
   },
